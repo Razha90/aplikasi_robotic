@@ -4,9 +4,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:aplikasi_robotic/help/bluetooth.dart';
+import 'package:cherry_toast/cherry_toast.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_classic/flutter_blue_classic.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -28,6 +32,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
   final List<DataPoint> _dataPoints = [];
   final TooltipBehavior _tooltipBehavior = TooltipBehavior();
   Timer? _debounce;
+  String _fileName = "";
 
   @override
   void initState() {
@@ -78,9 +83,27 @@ class _ConnectDeviceState extends State<ConnectDevice> {
         .join();
   }
 
-  void exportExcel() {
+  Future<void> exportExcel() async {
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      print("Izin penyimpanan tidak diberikan");
+      if (mounted) {
+        CherryToast.warning(
+          title: Text("Izin Penyiapanan dibutuhkan!",
+              style:
+                  GoogleFonts.poppins(color: Colors.amberAccent, fontSize: 12)),
+          action: Text(
+            "Pastikan izin penyimpanan diaktifkan",
+            style: GoogleFonts.poppins(color: Colors.amberAccent, fontSize: 12),
+          ),
+        ).show(context);
+      }
+      return;
+    }
+
     var excel = Excel.createExcel();
-    Sheet sheetObject = excel['analisis-${getRandomFileName()}'];
+    Sheet sheetObject =
+        excel['analisis-${DateTime.now().millisecondsSinceEpoch}'];
     sheetObject.appendRow([
       TextCellValue("Pulse"),
       TextCellValue("Speed"),
@@ -93,10 +116,49 @@ class _ConnectDeviceState extends State<ConnectDevice> {
       ]);
     }
 
+    excel.delete('Sheet1');
+
     var fileBytes = excel.save();
-    File('output.xlsx')
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(fileBytes!);
+
+    if (fileBytes == null) {
+      print("Gagal menyimpan file");
+      if (mounted) {
+        CherryToast.error(
+          title: Text("Gagal menyimpan file",
+              style:
+                  GoogleFonts.poppins(color: Colors.redAccent, fontSize: 12)),
+          action: Text(
+            "Coba lagi, dan periksa izin penyimpanan",
+            style: GoogleFonts.poppins(color: Colors.redAccent, fontSize: 12),
+          ),
+        ).show(context);
+      }
+      return;
+    }
+
+    Directory directory = Directory("/storage/emulated/0/Download");
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+    String filePath = "${directory.path}/output-analisis.xlsx";
+
+    File file = File(filePath);
+    await file.writeAsBytes(fileBytes);
+
+    print("File disimpan di: $filePath");
+    if (mounted) {
+      CherryToast.success(
+        title: Text("File berhasil disimpan",
+            style: GoogleFonts.poppins(color: Colors.green, fontSize: 12)),
+        action: Text(
+          "File disimpan di folder Download",
+          style: GoogleFonts.poppins(color: Colors.green, fontSize: 12),
+        ),
+      ).show(context);
+    }
+    setState(() {
+      _fileName = filePath;
+    });
   }
 
   @override
@@ -227,6 +289,49 @@ class _ConnectDeviceState extends State<ConnectDevice> {
                   )
                 ],
               ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      exportExcel();
+                    },
+                    child: Text("Export Excel"),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _fileName != ""
+                  ? Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            try {
+                              await OpenFilex.open(_fileName);
+                            } catch (e) {
+                              if (context.mounted) {
+                                CherryToast.error(
+                                  title: Text("Gagal membuka file",
+                                      style: GoogleFonts.poppins(
+                                          color: Colors.redAccent,
+                                          fontSize: 12)),
+                                  action: Text(
+                                    "Coba lagi, dan periksa izin penyimpanan",
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.redAccent, fontSize: 12),
+                                  ),
+                                ).show(context);
+                              }
+                            }
+                          },
+                          child: Text("Buka File Excel"),
+                        ),
+                      ))
+                  : SizedBox(),
             )
           ],
         ));

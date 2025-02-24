@@ -1,6 +1,17 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:aplikasi_robotic/help/bluetooth.dart';
+import 'package:aplikasi_robotic/page/bluetooth_active.dart';
+import 'package:cherry_toast/cherry_toast.dart';
+import 'package:cherry_toast/resources/arrays.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_classic/flutter_blue_classic.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
 
@@ -12,10 +23,112 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // String _filePath = "";
   @override
   void initState() {
     super.initState();
   }
+
+  // final List<DataPoint> _dataPoints = [
+  //   DataPoint(100, 1),
+  //   DataPoint(200, 2),
+  //   DataPoint(300, 3),
+  //   DataPoint(400, 4),
+  //   DataPoint(500, 5),
+  //   DataPoint(600, 6),
+  //   DataPoint(700, 7),
+  //   DataPoint(800, 8),
+  //   DataPoint(900, 9),
+  //   DataPoint(1000, 10),
+  // ];
+
+  // String getRandomFileName({int length = 10}) {
+  //   const String chars =
+  //       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  //   Random random = Random();
+
+  //   return List.generate(length, (index) => chars[random.nextInt(chars.length)])
+  //       .join();
+  // }
+
+  // Future<void> exportExcel() async {
+  //   var status = await Permission.storage.request();
+  //   if (!status.isGranted) {
+  //     print("Izin penyimpanan tidak diberikan");
+  //     if (mounted) {
+  //       CherryToast.warning(
+  //         title: Text("Izin Penyiapanan dibutuhkan!",
+  //             style:
+  //                 GoogleFonts.poppins(color: Colors.amberAccent, fontSize: 12)),
+  //         action: Text(
+  //           "Pastikan izin penyimpanan diaktifkan",
+  //           style: GoogleFonts.poppins(color: Colors.amberAccent, fontSize: 12),
+  //         ),
+  //       ).show(context);
+  //     }
+  //     return;
+  //   }
+
+  //   var excel = Excel.createExcel();
+  //   Sheet sheetObject =
+  //       excel['analisis-${DateTime.now().millisecondsSinceEpoch}'];
+  //   sheetObject.appendRow([
+  //     TextCellValue("Pulse"),
+  //     TextCellValue("Speed"),
+  //   ]);
+
+  //   for (var row in _dataPoints) {
+  //     sheetObject.appendRow([
+  //       IntCellValue(row.pulse),
+  //       DoubleCellValue(row.value),
+  //     ]);
+  //   }
+
+  //   excel.delete('Sheet1');
+
+  //   var fileBytes = excel.save();
+
+  //   if (fileBytes == null) {
+  //     print("Gagal menyimpan file");
+  //     if (mounted) {
+  //       CherryToast.error(
+  //         title: Text("Gagal menyimpan file",
+  //             style:
+  //                 GoogleFonts.poppins(color: Colors.redAccent, fontSize: 12)),
+  //         action: Text(
+  //           "Coba lagi, dan periksa izin penyimpanan",
+  //           style: GoogleFonts.poppins(color: Colors.redAccent, fontSize: 12),
+  //         ),
+  //       ).show(context);
+  //     }
+  //     return;
+  //   }
+
+  //   Directory directory = Directory("/storage/emulated/0/Download");
+  //   if (!directory.existsSync()) {
+  //     directory.createSync(recursive: true);
+  //   }
+  //   String filePath = "${directory.path}/output-analisis.xlsx";
+
+  //   File file = File(filePath);
+  //   await file.writeAsBytes(fileBytes);
+
+  //   print("File disimpan di: $filePath");
+  //   if (mounted) {
+  //     CherryToast.success(
+  //       animationType: AnimationType.fromTop,
+  //       title: Text("File berhasil disimpan",
+  //           style: GoogleFonts.poppins(color: Colors.green, fontSize: 12)),
+  //       action: Text(
+  //         "File disimpan di folder Download",
+  //         style: GoogleFonts.poppins(color: Colors.green, fontSize: 12),
+  //       ),
+  //     ).show(context);
+  //   }
+  //   setState(() {
+  //     _filePath = filePath;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +247,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
               },
             ),
+            // ElevatedButton(
+            //     onPressed: () {
+            //       exportExcel();
+            //     },
+            //     child: Text("Simpan Data Excel")),
+            // if (_filePath.isNotEmpty)
+            //   ElevatedButton(
+            //     onPressed: () async {
+            //       await OpenFilex.open(_filePath);
+            //     },
+            //     child: Text("Buka File Excel"),
+            //   ),
           ],
         ));
   }
