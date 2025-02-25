@@ -22,7 +22,7 @@
     />
 
     <application
-        android:label="aplikasi_robotic"
+        android:label="@string/appName"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

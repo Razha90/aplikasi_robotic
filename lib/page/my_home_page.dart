@@ -51,6 +51,11 @@ class _MyHomePageState extends State<MyHomePage> {
   //       .join();
   // }
 
+  // String generateRandomFileName() {
+  //   int timestamp = DateTime.now().millisecondsSinceEpoch;
+  //   return "output-$timestamp";
+  // }
+
   // Future<void> exportExcel() async {
   //   var status = await Permission.storage.request();
   //   if (!status.isGranted) {
@@ -108,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //   if (!directory.existsSync()) {
   //     directory.createSync(recursive: true);
   //   }
-  //   String filePath = "${directory.path}/output-analisis.xlsx";
+  //   String filePath = "${directory.path}/${generateRandomFileName()}.xlsx";
 
   //   File file = File(filePath);
   //   await file.writeAsBytes(fileBytes);

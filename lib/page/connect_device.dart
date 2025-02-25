@@ -83,6 +83,11 @@ class _ConnectDeviceState extends State<ConnectDevice> {
         .join();
   }
 
+  String generateRandomFileName() {
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    return "output-$timestamp";
+  }
+
   Future<void> exportExcel() async {
     var status = await Permission.storage.request();
     if (!status.isGranted) {
@@ -140,7 +145,8 @@ class _ConnectDeviceState extends State<ConnectDevice> {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
-    String filePath = "${directory.path}/output-analisis.xlsx";
+    // String filePath = "${directory.path}/output-analisis.xlsx";
+    String filePath = "${directory.path}/${generateRandomFileName()}.xlsx";
 
     File file = File(filePath);
     await file.writeAsBytes(fileBytes);
@@ -268,7 +274,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
                   Text(_value.toInt().toString()),
                   Slider(
                     min: 0,
-                    max: 250,
+                    max: 100,
                     divisions: 50,
                     activeColor: Colors.purple,
                     inactiveColor: Colors.purple.shade100,
@@ -281,8 +287,9 @@ class _ConnectDeviceState extends State<ConnectDevice> {
                           _value = value;
                         });
                         if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(Duration(seconds: 1), () {
-                          sendData(_value.toInt().toString());
+                        _debounce = Timer(Duration(milliseconds: 500), () {
+                          int convertedValue = ((_value * 250) / 100).toInt();
+                          sendData(convertedValue.toString());
                         });
                       }
                     },
@@ -306,7 +313,7 @@ class _ConnectDeviceState extends State<ConnectDevice> {
             SliverToBoxAdapter(
               child: _fileName != ""
                   ? Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(0),
                       child: Center(
                         child: ElevatedButton(
                           onPressed: () async {
